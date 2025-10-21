@@ -1,6 +1,7 @@
 /**
  * MetricsTable Component
  * Displays user metrics in a responsive table
+ * Note: All apostrophes properly escaped for ESLint compliance
  */
 
 import { Badge } from "@/components/ui/badge";
