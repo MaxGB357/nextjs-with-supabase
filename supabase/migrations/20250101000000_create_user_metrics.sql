@@ -74,7 +74,6 @@ CREATE TRIGGER set_updated_at
 
 -- Grant permissions to authenticated users
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_metrics TO authenticated;
-GRANT USAGE ON SEQUENCE user_metrics_id_seq TO authenticated;
 
 -- Add comments for documentation
 COMMENT ON TABLE public.user_metrics IS 'Stores user metrics with categories and values (1-5 scale)';
