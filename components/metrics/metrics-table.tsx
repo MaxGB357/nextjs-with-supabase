@@ -32,7 +32,7 @@ export function MetricsTable({ metrics }: MetricsTableProps) {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            <p>You don't have any metrics yet.</p>
+            <p>You don&apos;t have any metrics yet.</p>
             <p className="text-sm mt-2">Use the data import script to add some metrics.</p>
           </div>
         </CardContent>
