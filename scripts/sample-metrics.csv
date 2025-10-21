@@ -1,0 +1,11 @@
+metric_name,metric_value,category,description
+API Response Time,4,Performance,Average API response time under 200ms
+Code Coverage,5,Quality,Test coverage above 85%
+Bug Resolution Time,3,Efficiency,Average time to resolve bugs
+User Satisfaction,5,Customer,NPS score from user surveys
+Deployment Frequency,4,DevOps,Deployments per week
+Security Compliance,5,Security,Security audit score
+Documentation Quality,4,Quality,Documentation completeness score
+Load Time,4,Performance,Page load time optimization
+Error Rate,2,Reliability,Production error rate
+Team Velocity,4,Efficiency,Sprint velocity trend
