@@ -6,7 +6,6 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Employee,
-  PerformanceEvaluation,
   EvaluationComment,
   EmployeeWithEvaluation,
   TeamSummary,

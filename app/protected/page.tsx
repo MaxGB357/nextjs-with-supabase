@@ -32,7 +32,6 @@ export default function DashboardPage() {
     averageCompetencies: 0,
     highPerformers: 0
   });
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [employeeDetail, setEmployeeDetail] = useState<EmployeeDetail | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +73,6 @@ export default function DashboardPage() {
 
   // Handle view employee details
   const handleViewDetails = async (employeeId: string) => {
-    setSelectedEmployeeId(employeeId);
     setIsModalOpen(true);
 
     try {
@@ -88,7 +86,6 @@ export default function DashboardPage() {
   // Handle close modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedEmployeeId(null);
     setEmployeeDetail(null);
   };
 
