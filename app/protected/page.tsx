@@ -1,84 +1,150 @@
+"use client";
+
 /**
- * Metrics Dashboard Page
- * Protected route that displays user metrics with summary statistics
- * Data is automatically filtered by RLS policies to show only authenticated user's metrics
+ * Team Performance Dashboard
+ * Protected route that displays manager's team performance evaluations
+ * Data is automatically filtered by RLS policies to show only manager's direct reports
  */
 
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { InfoIcon, TrendingUp } from "lucide-react";
-import { MetricsSummaryCard } from "@/components/metrics/metrics-summary";
-import { MetricsTable } from "@/components/metrics/metrics-table";
-import { CategoryBreakdown } from "@/components/metrics/category-breakdown";
-import { getUserMetrics, calculateMetricsSummary, getCategoryStats } from "@/lib/services/metrics.service";
+import { useState, useEffect } from "react";
+import { Users } from "lucide-react";
+import { SummaryCards } from "@/components/dashboard/summary-cards";
+import { TeamTable } from "@/components/dashboard/team-table";
+import { EmployeeDetailModal } from "@/components/dashboard/employee-detail-modal";
+import { YearSelector } from "@/components/dashboard/year-selector";
+import {
+  getCurrentManager,
+  getTeamMembers,
+  calculateTeamSummary,
+  getEmployeeDetail,
+  getAvailableYears
+} from "@/lib/services/performance.client.service";
+import type { Employee, EmployeeWithEvaluation, TeamSummary, EmployeeDetail } from "@/lib/types/performance.types";
 
-export default async function ProtectedPage() {
-  const supabase = await createClient();
+export default function DashboardPage() {
+  const [manager, setManager] = useState<Employee | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number>(2024);
+  const [availableYears, setAvailableYears] = useState<number[]>([2024]);
+  const [teamMembers, setTeamMembers] = useState<EmployeeWithEvaluation[]>([]);
+  const [teamSummary, setTeamSummary] = useState<TeamSummary>({
+    totalDirectReports: 0,
+    averagePotential: 0,
+    averageCompetencies: 0,
+    highPerformers: 0
+  });
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+  const [employeeDetail, setEmployeeDetail] = useState<EmployeeDetail | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Check authentication
-  const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims) {
-    redirect("/auth/login");
+  // Load initial data
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        // Get current manager
+        const managerData = await getCurrentManager();
+        setManager(managerData);
+
+        // Get available years
+        const years = await getAvailableYears();
+        setAvailableYears(years);
+
+        // Get team data for selected year
+        const members = await getTeamMembers(selectedYear);
+        setTeamMembers(members);
+
+        // Calculate summary
+        const summary = calculateTeamSummary(members);
+        setTeamSummary(summary);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, [selectedYear]);
+
+  // Handle year change
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+  };
+
+  // Handle view employee details
+  const handleViewDetails = async (employeeId: string) => {
+    setSelectedEmployeeId(employeeId);
+    setIsModalOpen(true);
+
+    try {
+      const detail = await getEmployeeDetail(employeeId, selectedYear);
+      setEmployeeDetail(detail);
+    } catch (error) {
+      console.error("Error loading employee details:", error);
+    }
+  };
+
+  // Handle close modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedEmployeeId(null);
+    setEmployeeDetail(null);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 w-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando dashboard...</p>
+        </div>
+      </div>
+    );
   }
-
-  // Fetch user metrics (automatically filtered by RLS)
-  let metrics: Awaited<ReturnType<typeof getUserMetrics>> = [];
-  try {
-    metrics = await getUserMetrics();
-  } catch (err) {
-    console.error("Error loading metrics:", err);
-    metrics = [];
-  }
-
-  // Calculate summary statistics
-  const summary = calculateMetricsSummary(metrics);
-  const categoryStats = getCategoryStats(metrics);
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-8">
+    <div className="flex-1 w-full flex flex-col gap-6">
       {/* Header */}
       <div className="w-full">
-        <div className="flex items-center gap-3 mb-4">
-          <TrendingUp className="h-8 w-8" />
-          <h1 className="text-3xl font-bold">Metrics Dashboard</h1>
-        </div>
-        <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
-          <InfoIcon size="16" strokeWidth={2} />
-          This dashboard displays your personal metrics. All data is secured with Row Level Security and automatically filtered to show only your metrics.
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+              <Users className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Mi Equipo</h1>
+              <p className="text-sm text-muted-foreground">
+                {manager ? `${manager.first_name} ${manager.last_name}` : 'Cargando...'}
+              </p>
+            </div>
+          </div>
+          <YearSelector
+            selectedYear={selectedYear}
+            availableYears={availableYears}
+            onYearChange={handleYearChange}
+          />
         </div>
       </div>
 
-      {/* Summary Statistics */}
+      {/* Summary Cards */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Summary Statistics</h2>
-        <MetricsSummaryCard summary={summary} />
+        <h2 className="text-xl font-semibold mb-4">Resumen del Equipo</h2>
+        <SummaryCards summary={teamSummary} />
       </div>
 
-      {/* Category Breakdown */}
-      {categoryStats.length > 0 && (
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Category Distribution</h2>
-          <CategoryBreakdown categoryStats={categoryStats} />
-        </div>
-      )}
-
-      {/* Metrics Table */}
+      {/* Team Table */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">All Metrics</h2>
-        <MetricsTable metrics={metrics} />
+        <h2 className="text-xl font-semibold mb-4">Miembros del Equipo</h2>
+        <TeamTable teamMembers={teamMembers} onViewDetails={handleViewDetails} />
       </div>
 
-      {/* User Info (collapsed) */}
-      <details className="mt-4">
-        <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-          View user details
-        </summary>
-        <pre className="text-xs font-mono p-3 rounded border max-h-32 overflow-auto mt-2 bg-muted">
-          {JSON.stringify(data.claims, null, 2)}
-        </pre>
-      </details>
+      {/* Employee Detail Modal */}
+      <EmployeeDetailModal
+        employeeDetail={employeeDetail}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";
