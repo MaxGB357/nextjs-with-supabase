@@ -44,6 +44,9 @@ export interface PerformanceEvaluation {
   cuidamos_el_futuro_score: number | null;
   cuidamos_el_futuro_label: string | null;
 
+  // Additional metrics
+  ipe: number | null;  // International Position Evaluation (1-5)
+
   created_at: string;
   updated_at: string;
 }
@@ -154,4 +157,23 @@ export function getPerformanceColor(score: number | null): PerformanceColor {
   };
 
   return colors[level];
+}
+
+// Historic data types for individual view
+export interface YearData {
+  score: number | null;
+  label: string | null;
+}
+
+export interface MetricRow {
+  metricName: string;
+  yearData: Record<number, YearData>;  // year -> { score, label }
+  average: number | null;
+}
+
+export interface HistoricEvaluationData {
+  employee: Employee;
+  evaluationsByYear: Record<number, PerformanceEvaluation>;  // year -> evaluation
+  availableYears: number[];
+  metrics: MetricRow[];
 }

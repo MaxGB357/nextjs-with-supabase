@@ -76,6 +76,9 @@ CREATE TABLE performance_evaluations (
     cuidamos_el_futuro_score DECIMAL(3,2),
     cuidamos_el_futuro_label VARCHAR(50),
 
+    -- Additional Metrics
+    ipe INTEGER,  -- International Position Evaluation (1-5)
+
     -- Metadata
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),

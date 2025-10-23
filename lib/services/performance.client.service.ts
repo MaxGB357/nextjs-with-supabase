@@ -11,6 +11,9 @@ import type {
   TeamSummary,
   EmployeeDetail,
   CompetencyData,
+  HistoricEvaluationData,
+  MetricRow,
+  PerformanceEvaluation,
 } from "@/lib/types/performance.types";
 
 /**
@@ -224,4 +227,150 @@ export async function getAvailableYears(): Promise<number[]> {
   // Get unique years
   const years = [...new Set(data.map(d => d.evaluation_year))];
   return years.length > 0 ? years : [2024];
+}
+
+/**
+ * Get manager and all their direct reports for employee selector
+ */
+export async function getManagerAndTeam(): Promise<Employee[]> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // Get manager
+  const { data: manager, error: managerError } = await supabase
+    .from('employees')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (managerError) {
+    console.error('Error fetching manager:', managerError);
+    return [];
+  }
+
+  // Get direct reports
+  const { data: directReports, error: reportsError } = await supabase
+    .from('employees')
+    .select('*')
+    .eq('manager_id', user.id)
+    .order('last_name', { ascending: true })
+    .order('first_name', { ascending: true });
+
+  if (reportsError) {
+    console.error('Error fetching direct reports:', reportsError);
+    return manager ? [manager] : [];
+  }
+
+  // Filter out manager from direct reports to avoid duplicates
+  const filteredReports = directReports?.filter(report => report.id !== manager.id) || [];
+
+  // Combine manager and direct reports
+  return [manager, ...filteredReports];
+}
+
+/**
+ * Get historic evaluation data for a specific employee
+ */
+export async function getEmployeeHistoricData(employeeId: string): Promise<HistoricEvaluationData | null> {
+  const supabase = createClient();
+
+  // Get employee
+  const { data: employee, error: employeeError } = await supabase
+    .from('employees')
+    .select('*')
+    .eq('id', employeeId)
+    .single();
+
+  if (employeeError || !employee) {
+    console.error('Error fetching employee:', employeeError);
+    return null;
+  }
+
+  // Get all evaluations for this employee
+  const { data: evaluations, error: evaluationsError } = await supabase
+    .from('performance_evaluations')
+    .select('*')
+    .eq('employee_id', employeeId)
+    .order('evaluation_year', { ascending: true });
+
+  if (evaluationsError) {
+    console.error('Error fetching evaluations:', evaluationsError);
+    return null;
+  }
+
+  // Organize evaluations by year
+  const evaluationsByYear: Record<number, PerformanceEvaluation> = {};
+  const availableYears: number[] = [];
+
+  (evaluations || []).forEach((evaluation) => {
+    evaluationsByYear[evaluation.evaluation_year] = evaluation;
+    availableYears.push(evaluation.evaluation_year);
+  });
+
+  // Build metrics rows
+  const metrics = buildMetricRows(evaluationsByYear, availableYears);
+
+  return {
+    employee,
+    evaluationsByYear,
+    availableYears: availableYears.sort((a, b) => a - b),
+    metrics
+  };
+}
+
+/**
+ * Helper function to build metric rows from evaluations
+ */
+function buildMetricRows(
+  evaluationsByYear: Record<number, PerformanceEvaluation>,
+  years: number[]
+): MetricRow[] {
+  const metricDefinitions = [
+    { name: 'Potencial General', scoreKey: 'general_potential', labelKey: 'general_potential_label' },
+    { name: 'Evaluación Par', scoreKey: 'peer_client_score', labelKey: 'peer_client_label' },
+    { name: 'Evaluación Jefe', scoreKey: 'direct_manager_score', labelKey: 'direct_manager_label' },
+    { name: 'Promedio Competencias', scoreKey: 'competencies_avg_score', labelKey: 'competencies_avg_label' },
+    { name: 'IPE', scoreKey: 'ipe', labelKey: null },
+    { name: 'Somos un Solo Equipo', scoreKey: 'somos_un_solo_equipo_score', labelKey: 'somos_un_solo_equipo_label' },
+    { name: 'Nos Movemos Agilmente', scoreKey: 'nos_movemos_agilmente_score', labelKey: 'nos_movemos_agilmente_label' },
+    { name: 'Nos Apasionamos por el Cliente', scoreKey: 'nos_apasionamos_por_cliente_score', labelKey: 'nos_apasionamos_por_cliente_label' },
+    { name: 'Cuidamos el Futuro', scoreKey: 'cuidamos_el_futuro_score', labelKey: 'cuidamos_el_futuro_label' },
+  ];
+
+  return metricDefinitions.map((metricDef) => {
+    const yearData: Record<number, { score: number | null; label: string | null }> = {};
+    const scores: number[] = [];
+
+    years.forEach((year) => {
+      const evaluation = evaluationsByYear[year];
+      if (evaluation) {
+        const score = evaluation[metricDef.scoreKey as keyof PerformanceEvaluation] as number | null;
+        const label = metricDef.labelKey
+          ? (evaluation[metricDef.labelKey as keyof PerformanceEvaluation] as string | null)
+          : null;
+
+        yearData[year] = { score, label };
+
+        // Collect non-null scores for average
+        if (score !== null) {
+          scores.push(score);
+        }
+      } else {
+        yearData[year] = { score: null, label: null };
+      }
+    });
+
+    // Calculate average from non-null scores
+    const average = scores.length > 0
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : null;
+
+    return {
+      metricName: metricDef.name,
+      yearData,
+      average
+    };
+  });
 }
