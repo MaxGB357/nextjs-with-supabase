@@ -14,13 +14,13 @@ interface MetricsTableProps {
 }
 
 /**
- * Returns a color variant based on the metric value (1-5)
+ * Returns background and text color classes based on the metric value (1-5)
  */
-function getValueBadgeVariant(value: number): "destructive" | "outline" | "secondary" | "default" {
-  if (value <= 2) return "destructive";
-  if (value === 3) return "outline";
-  if (value === 4) return "secondary";
-  return "default"; // value === 5
+function getValueBadgeStyle(value: number): { bgColor: string; textColor: string } {
+  if (value >= 3.3) return { bgColor: 'bg-[#271DED]', textColor: 'text-white' };   // Azul
+  if (value >= 3.0) return { bgColor: 'bg-[#257916]', textColor: 'text-white' };   // Verde
+  if (value >= 2.71) return { bgColor: 'bg-[#FFDB3D]', textColor: 'text-black' };  // Amarillo
+  return { bgColor: 'bg-[#FF5D38]', textColor: 'text-white' };                     // Naranja
 }
 
 export function MetricsTable({ metrics }: MetricsTableProps) {
@@ -60,25 +60,28 @@ export function MetricsTable({ metrics }: MetricsTableProps) {
               </tr>
             </thead>
             <tbody>
-              {metrics.map((metric) => (
-                <tr key={metric.id} className="border-b last:border-b-0 hover:bg-muted/50 transition-colors">
-                  <td className="py-3 px-4 font-medium">{metric.metric_name}</td>
-                  <td className="py-3 px-4">
-                    <Badge variant="secondary">{metric.category}</Badge>
-                  </td>
-                  <td className="py-3 px-4">
-                    <Badge variant={getValueBadgeVariant(metric.metric_value)}>
-                      {metric.metric_value}
-                    </Badge>
-                  </td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground max-w-xs truncate">
-                    {metric.description || "—"}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground whitespace-nowrap">
-                    {formatDate(metric.created_at)}
-                  </td>
-                </tr>
-              ))}
+              {metrics.map((metric) => {
+                const valueStyle = getValueBadgeStyle(metric.metric_value);
+                return (
+                  <tr key={metric.id} className="border-b last:border-b-0 hover:bg-muted/50 transition-colors">
+                    <td className="py-3 px-4 font-medium">{metric.metric_name}</td>
+                    <td className="py-3 px-4">
+                      <Badge variant="secondary">{metric.category}</Badge>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge className={`${valueStyle.bgColor} ${valueStyle.textColor} border-0`}>
+                        {metric.metric_value}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground max-w-xs truncate">
+                      {metric.description || "—"}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-muted-foreground whitespace-nowrap">
+                      {formatDate(metric.created_at)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

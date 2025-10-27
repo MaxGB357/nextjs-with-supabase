@@ -119,10 +119,10 @@ export interface PerformanceColor {
 // Helper function to get performance level based on score (1-5 scale)
 export function getPerformanceLevel(score: number | null): PerformanceLevel {
   if (score === null) return 'medium';
-  if (score >= 4.0) return 'excellent';
-  if (score >= 3.0) return 'high';
-  if (score >= 2.0) return 'medium';
-  return 'low';
+  if (score >= 3.3) return 'excellent';   // Azul
+  if (score >= 3.0) return 'high';        // Verde
+  if (score >= 2.71) return 'medium';     // Amarillo
+  return 'low';                            // Naranja
 }
 
 // Helper function to get color for performance level
@@ -132,27 +132,27 @@ export function getPerformanceColor(score: number | null): PerformanceColor {
   const colors: Record<PerformanceLevel, PerformanceColor> = {
     excellent: {
       level: 'excellent',
-      color: 'text-green-700 dark:text-green-400',
-      bgColor: 'bg-green-50 dark:bg-green-950',
-      textColor: 'text-green-700 dark:text-green-400'
+      color: 'text-white',
+      bgColor: 'bg-[#271DED]',  // Azul - Score >= 3.3
+      textColor: 'text-white'
     },
     high: {
       level: 'high',
-      color: 'text-blue-700 dark:text-blue-400',
-      bgColor: 'bg-blue-50 dark:bg-blue-950',
-      textColor: 'text-blue-700 dark:text-blue-400'
+      color: 'text-white',
+      bgColor: 'bg-[#257916]',  // Verde - Score >= 3.0 y < 3.3
+      textColor: 'text-white'
     },
     medium: {
       level: 'medium',
-      color: 'text-yellow-700 dark:text-yellow-400',
-      bgColor: 'bg-yellow-50 dark:bg-yellow-950',
-      textColor: 'text-yellow-700 dark:text-yellow-400'
+      color: 'text-black',
+      bgColor: 'bg-[#FFDB3D]',  // Amarillo - Score >= 2.71 y < 3.0
+      textColor: 'text-black'
     },
     low: {
       level: 'low',
-      color: 'text-red-700 dark:text-red-400',
-      bgColor: 'bg-red-50 dark:bg-red-950',
-      textColor: 'text-red-700 dark:text-red-400'
+      color: 'text-white',
+      bgColor: 'bg-[#FF5D38]',  // Naranja - Score < 2.71
+      textColor: 'text-white'
     }
   };
 
