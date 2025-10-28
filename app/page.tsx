@@ -2,8 +2,6 @@ import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { Hero } from "@/components/hero";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
 import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
 
@@ -31,19 +29,6 @@ export default function Home() {
       <section className="flex-1 flex flex-col items-center justify-center px-6 py-16 md:py-24">
         <div className="container max-w-6xl mx-auto">
           <Hero />
-
-          {/* Next Steps Section */}
-          <div className="mt-20">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold mb-3">Comienza Ahora</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Sigue estos pasos para comenzar a usar la plataforma
-              </p>
-            </div>
-            <div className="max-w-4xl mx-auto">
-              {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
-            </div>
-          </div>
         </div>
       </section>
 

@@ -15,6 +15,7 @@ import { YearSelector } from "@/components/dashboard/year-selector";
 import { ViewToggle } from "@/components/dashboard/view-toggle";
 import { EmployeeSelector } from "@/components/dashboard/employee-selector";
 import { HistoricTable } from "@/components/dashboard/historic-table";
+import { MetricEvolutionChart } from "@/components/dashboard/metric-evolution-chart";
 import {
   getCurrentManager,
   getTeamMembers,
@@ -221,11 +222,18 @@ export default function DashboardPage() {
           )}
 
           {!isLoadingHistoric && historicData && (
-            <HistoricTable
-              metrics={historicData.metrics}
-              availableYears={historicData.availableYears}
-              employeeName={`${historicData.employee.first_name} ${historicData.employee.last_name}`}
-            />
+            <>
+              <MetricEvolutionChart
+                historicData={historicData}
+                employeeName={`${historicData.employee.first_name} ${historicData.employee.last_name}`}
+              />
+
+              <HistoricTable
+                metrics={historicData.metrics}
+                availableYears={historicData.availableYears}
+                employeeName={`${historicData.employee.first_name} ${historicData.employee.last_name}`}
+              />
+            </>
           )}
 
           {!isLoadingHistoric && !historicData && selectedEmployeeId && (

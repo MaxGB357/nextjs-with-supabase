@@ -78,7 +78,7 @@ export function EmployeeDetailModal({ employeeDetail, onClose, isOpen }: Employe
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     {/* General Potential */}
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">Potencial General</p>
@@ -119,6 +119,21 @@ export function EmployeeDetailModal({ employeeDetail, onClose, isOpen }: Employe
                           </Badge>
                           {evaluation.direct_manager_label && (
                             <p className="text-xs text-muted-foreground">{evaluation.direct_manager_label}</p>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Colaborador Score */}
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Evaluación Colaborador</p>
+                      {evaluation.colaborador_desempeño !== null && (
+                        <>
+                          <Badge className={`${getPerformanceColor(evaluation.colaborador_desempeño).bgColor} ${getPerformanceColor(evaluation.colaborador_desempeño).textColor} border-0 text-lg px-3 py-1`}>
+                            {evaluation.colaborador_desempeño.toFixed(2)}
+                          </Badge>
+                          {evaluation.colaborador_desempeño_label && (
+                            <p className="text-xs text-muted-foreground">{evaluation.colaborador_desempeño_label}</p>
                           )}
                         </>
                       )}

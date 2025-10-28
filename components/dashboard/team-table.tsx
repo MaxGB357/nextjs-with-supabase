@@ -12,7 +12,7 @@ interface TeamTableProps {
   onViewDetails: (employeeId: string) => void;
 }
 
-type SortField = 'code' | 'name' | 'potential' | 'competencies' | 'manager_score' | 'peer_client_score' | 'ipe' | null;
+type SortField = 'code' | 'name' | 'potential' | 'competencies' | 'manager_score' | 'peer_client_score' | 'colaborador_score' | 'ipe' | null;
 type SortDirection = 'asc' | 'desc' | null;
 
 export function TeamTable({ teamMembers, onViewDetails }: TeamTableProps) {
@@ -69,6 +69,10 @@ export function TeamTable({ teamMembers, onViewDetails }: TeamTableProps) {
       case 'peer_client_score':
         aValue = a.evaluation?.peer_client_score ?? -1;
         bValue = b.evaluation?.peer_client_score ?? -1;
+        break;
+      case 'colaborador_score':
+        aValue = a.evaluation?.colaborador_desempeño ?? -1;
+        bValue = b.evaluation?.colaborador_desempeño ?? -1;
         break;
       case 'ipe':
         aValue = a.evaluation?.ipe ?? -1;
@@ -132,6 +136,9 @@ export function TeamTable({ teamMembers, onViewDetails }: TeamTableProps) {
                 <SortButton field="peer_client_score" label="Evaluación Par" />
               </th>
               <th className="text-left p-3 text-sm font-semibold">
+                <SortButton field="colaborador_score" label="Evaluación Colaborador" />
+              </th>
+              <th className="text-left p-3 text-sm font-semibold">
                 <SortButton field="ipe" label="IPE" />
               </th>
               <th className="text-center p-3 text-sm font-semibold">Acciones</th>
@@ -144,6 +151,7 @@ export function TeamTable({ teamMembers, onViewDetails }: TeamTableProps) {
               const competenciesColor = getPerformanceColor(evaluation?.competencies_avg_score ?? null);
               const managerColor = getPerformanceColor(evaluation?.direct_manager_score ?? null);
               const peerClientColor = getPerformanceColor(evaluation?.peer_client_score ?? null);
+              const colaboradorColor = getPerformanceColor(evaluation?.colaborador_desempeño ?? null);
               const ipeColor = getPerformanceColor(evaluation?.ipe ?? null);
 
               return (
@@ -212,6 +220,22 @@ export function TeamTable({ teamMembers, onViewDetails }: TeamTableProps) {
                         {evaluation.peer_client_label && (
                           <span className="text-xs text-muted-foreground">
                             {evaluation.peer_client_label}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">Sin evaluación</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {evaluation?.colaborador_desempeño !== null ? (
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${colaboradorColor.bgColor} ${colaboradorColor.textColor} border-0`}>
+                          {evaluation.colaborador_desempeño.toFixed(2)}
+                        </Badge>
+                        {evaluation.colaborador_desempeño_label && (
+                          <span className="text-xs text-muted-foreground">
+                            {evaluation.colaborador_desempeño_label}
                           </span>
                         )}
                       </div>

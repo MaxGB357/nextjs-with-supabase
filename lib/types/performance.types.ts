@@ -33,6 +33,8 @@ export interface PerformanceEvaluation {
   direct_manager_label: string | null;
   competencies_avg_score: number | null;
   competencies_avg_label: string | null;
+  colaborador_desempeño: number | null;
+  colaborador_desempeño_label: string | null;
 
   // Individual competencies
   somos_un_solo_equipo_score: number | null;

@@ -331,6 +331,7 @@ function buildMetricRows(
     { name: 'Potencial General', scoreKey: 'general_potential', labelKey: 'general_potential_label' },
     { name: 'Evaluación Par', scoreKey: 'peer_client_score', labelKey: 'peer_client_label' },
     { name: 'Evaluación Jefe', scoreKey: 'direct_manager_score', labelKey: 'direct_manager_label' },
+    { name: 'Evaluación Colaborador', scoreKey: 'colaborador_desempeño', labelKey: 'colaborador_desempeño_label' },
     { name: 'Promedio Competencias', scoreKey: 'competencies_avg_score', labelKey: 'competencies_avg_label' },
     { name: 'IPE', scoreKey: 'ipe', labelKey: null },
     { name: 'Somos un Solo Equipo', scoreKey: 'somos_un_solo_equipo_score', labelKey: 'somos_un_solo_equipo_label' },
