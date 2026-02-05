@@ -7,7 +7,9 @@
  */
 
 import { useState, useEffect } from "react";
-import { Users } from "lucide-react";
+import { Users, MessageSquare } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { TeamTable } from "@/components/dashboard/team-table";
 import { EmployeeDetailModal } from "@/components/dashboard/employee-detail-modal";
@@ -23,9 +25,15 @@ import {
   getEmployeeDetail,
   getAvailableYears,
   getManagerAndTeam,
-  getEmployeeHistoricData
+  getEmployeeHistoricData,
 } from "@/lib/services/performance.client.service";
-import type { Employee, EmployeeWithEvaluation, TeamSummary, EmployeeDetail, HistoricEvaluationData } from "@/lib/types/performance.types";
+import type {
+  Employee,
+  EmployeeWithEvaluation,
+  TeamSummary,
+  EmployeeDetail,
+  HistoricEvaluationData,
+} from "@/lib/types/performance.types";
 
 export default function DashboardPage() {
   // View state
@@ -40,16 +48,21 @@ export default function DashboardPage() {
     totalDirectReports: 0,
     averagePotential: 0,
     averageCompetencies: 0,
-    highPerformers: 0
+    highPerformers: 0,
   });
-  const [employeeDetail, setEmployeeDetail] = useState<EmployeeDetail | null>(null);
+  const [employeeDetail, setEmployeeDetail] = useState<EmployeeDetail | null>(
+    null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Individual view state
   const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
-  const [historicData, setHistoricData] = useState<HistoricEvaluationData | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(
+    null,
+  );
+  const [historicData, setHistoricData] =
+    useState<HistoricEvaluationData | null>(null);
   const [isLoadingHistoric, setIsLoadingHistoric] = useState(false);
 
   // Load initial data for team view
@@ -166,12 +179,23 @@ export default function DashboardPage() {
                 {currentView === "team" ? "Mi Equipo" : "Vista Individual"}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {manager ? `${manager.first_name} ${manager.last_name}` : 'Cargando...'}
+                {manager
+                  ? `${manager.first_name} ${manager.last_name}`
+                  : "Cargando..."}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <ViewToggle currentView={currentView} onViewChange={handleViewChange} />
+            <Link href="/protected/chat">
+              <Button className="gap-2 bg-gradient-to-r from-primary to-primary/80">
+                <MessageSquare className="h-4 w-4" />
+                Asistente IA
+              </Button>
+            </Link>
+            <ViewToggle
+              currentView={currentView}
+              onViewChange={handleViewChange}
+            />
             {currentView === "team" && (
               <YearSelector
                 selectedYear={selectedYear}
@@ -195,7 +219,10 @@ export default function DashboardPage() {
           {/* Team Table */}
           <div>
             <h2 className="text-xl font-semibold mb-4">Miembros del Equipo</h2>
-            <TeamTable teamMembers={teamMembers} onViewDetails={handleViewDetails} />
+            <TeamTable
+              teamMembers={teamMembers}
+              onViewDetails={handleViewDetails}
+            />
           </div>
         </>
       )}
@@ -216,7 +243,9 @@ export default function DashboardPage() {
             <div className="flex items-center justify-center p-12">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Cargando datos históricos...</p>
+                <p className="text-muted-foreground">
+                  Cargando datos históricos...
+                </p>
               </div>
             </div>
           )}
@@ -238,13 +267,17 @@ export default function DashboardPage() {
 
           {!isLoadingHistoric && !historicData && selectedEmployeeId && (
             <div className="border rounded-lg p-12 text-center">
-              <p className="text-muted-foreground">No se encontraron datos para este colaborador.</p>
+              <p className="text-muted-foreground">
+                No se encontraron datos para este colaborador.
+              </p>
             </div>
           )}
 
           {!selectedEmployeeId && (
             <div className="border rounded-lg p-12 text-center">
-              <p className="text-muted-foreground">Seleccione un colaborador para ver su historial de evaluaciones.</p>
+              <p className="text-muted-foreground">
+                Seleccione un colaborador para ver su historial de evaluaciones.
+              </p>
             </div>
           )}
         </div>
